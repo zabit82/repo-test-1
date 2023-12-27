@@ -1,18 +1,22 @@
-name: Create Workflow Dispatch
+name: Build Artifacts
 
 on: [push]
 
 jobs:
   build:
+
     runs-on: ubuntu-latest
+
     steps:
-      - name: Trigger Workflow
-        uses: actions/github-script@v6
-        with:
-          script: |
-            github.rest.actions.createWorkflowDispatch({
-              owner: zabit82,
-              repo: repo-test-2,
-              workflow_id: 'blank.yml',
-              ref: 'main',
-            })
+    - uses: actions/checkout@v1
+      with:
+        fetch-depth: 1
+
+    - name: call the other repo
+      env:
+        GITHUB_TOKEN: ${{ secrets.REPO_TEST_TOKEN }}
+        EVENT: Test
+        ORG: zabit82
+        REPO: repo-test-2
+      run: |
+        curl -d "{\"event_type\": \"${EVENT}\"}" -H "Content-Type: application/json" -H "Authorization: token ${GITHUB_TOKEN}" -H "Accept: application/vnd.github.everest-preview+json" "https://api.github.com/repos/${ORG}/${REPO}/dispatches"
